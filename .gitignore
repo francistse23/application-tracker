@@ -3,3 +3,4 @@
 /public/build
 .env
 node_modules
+/prisma/dev.db
