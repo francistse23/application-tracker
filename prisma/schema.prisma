@@ -21,6 +21,7 @@ model Job {
   id          String   @id
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company     String
   title       String
   url         String
   description String
