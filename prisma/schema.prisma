@@ -19,8 +19,8 @@ model User {
 
 model Job {
   id          String   @id
-  userId      String?
   user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String?
   company     String
   title       String
   url         String?
