@@ -19,6 +19,7 @@ function getJobs() {
   return [
     {
       id: "1",
+      company: "X",
       title: "Software Engineer",
       description: "A job at X company",
       user,
@@ -28,6 +29,7 @@ function getJobs() {
     {
       id: "2",
       title: "Software Engineer 2",
+      company: "Y",
       description: "A job at Y company",
       user,
       userId: user.id,
@@ -35,6 +37,7 @@ function getJobs() {
     },
     {
       id: "3",
+      company: "Z",
       title: "Senior Software Engineer",
       description: "A job at Z company",
       user,
