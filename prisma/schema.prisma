@@ -17,10 +17,18 @@ datasource db {
 //   jobs  Job[]
 // }
 
+// model Board {
+//   id   Int    @id @default(autoincrement())
+//   name String
+//   jobs Job[]
+// }
+
 model Job {
   id          String   @id
   // user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   // userId      String               
+  // board       Board    @relation(fields: [boardId], references: [id])
+  // boardId     Int
   company     String
   title       String
   url         String?
