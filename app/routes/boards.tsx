@@ -1,21 +1,33 @@
+import { Outlet, useLoaderData } from "@remix-run/react";
+
+import Column from "~/components/Column";
+import type { Job } from "~/types";
 import { db } from "~/utils/db.server";
 import { json } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { selectJobsByColumn } from "~/selectors/selectJobsByColumn";
 
 export const loader = async () => {
-  return json({
-    jobs: await db.job.findMany(),
-  });
+  const allJobs = await db.job.findMany();
+  const jobsByColumn = selectJobsByColumn(allJobs);
+
+  return json({ jobs: jobsByColumn });
 };
 
 export default function Boards() {
-  const data = useLoaderData<typeof loader>();
+  const { jobs } = useLoaderData<typeof loader>();
 
   return (
-    <ul>
-      {data.jobs.map((job) => (
-        <li key={job.id}>{job.title}</li>
-      ))}
-    </ul>
+    <div>
+      <Outlet />
+      <div>
+        {Object.entries(jobs).map(([columnName, jobsInColumn]) => (
+          <Column
+            key={columnName}
+            name={columnName}
+            jobs={jobsInColumn as unknown as Job[]}
+          />
+        ))}
+      </div>
+    </div>
   );
 }
