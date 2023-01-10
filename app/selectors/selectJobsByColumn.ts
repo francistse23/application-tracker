@@ -6,7 +6,7 @@ export function selectJobsByColumn(jobs: Job[]) {
   for (const job of jobs) {
     // defaults to 'applied' if there's no status associated with the job card
     if (!job.status) {
-      jobsByColumn["applied"] = [...jobsByColumn["applied"], job];
+      jobsByColumn["applied"] = [...(jobsByColumn["applied"] || []), job];
     } else {
       if (job.status in jobsByColumn) {
         jobsByColumn[job.status] = [...jobsByColumn[job.status], job];
