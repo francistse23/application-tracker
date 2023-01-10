@@ -44,5 +44,15 @@ function getJobs() {
       // userId: user.id,
       createdAt: new Date("2023-01-02"),
     },
+    {
+      id: "4",
+      company: "XZ",
+      title: "Mid level Software Engineer",
+      description: "A job at XZ company",
+      // user,
+      // userId: user.id,
+      createdAt: new Date("2023-01-02"),
+      status: "interviewing",
+    },
   ];
 }
