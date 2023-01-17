@@ -10,32 +10,59 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// model User {
-//   id    String @id @default(uuid())
-//   email String @unique
-//   name  String
-//   jobs  Job[]
-// }
+model User {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  name      String
+  boards    Board[]
+  Job       Job[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime?
+  deletedAt DateTime?
 
-// model Board {
-//   id   Int    @id @default(autoincrement())
-//   name String
-//   jobs Job[]
-// }
+  @@map("users")
+}
+
+model Board {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  user      User      @relation(fields: [userId], references: [id])
+  userId    String
+  lists     List[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@map("boards")
+}
+
+model List {
+  id        Int       @id @default(autoincrement())
+  name      String
+  sortOrder Int
+  jobs      Job[]
+  board     Board     @relation(fields: [boardId], references: [id])
+  boardId   Int
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@map("lists")
+}
 
 model Job {
-  id          String   @id
-  // user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  // userId      String               
-  // board       Board    @relation(fields: [boardId], references: [id])
-  // boardId     Int
+  id          Int       @id @default(autoincrement())
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  list        List      @relation(fields: [listId], references: [id], onDelete: Cascade)
+  listId      Int       @default(1)
   company     String
   title       String
+  description String?
   url         String?
-  description String
-  status      String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
 
   @@map("jobs")
 }
