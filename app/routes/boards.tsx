@@ -7,26 +7,30 @@ import { json } from "@remix-run/node";
 import { selectJobsByColumn } from "~/selectors/selectJobsByColumn";
 
 export const loader = async () => {
-  const allJobs = await db.job.findMany();
-  const jobsByColumn = selectJobsByColumn(allJobs);
+  const board = await db.board.findUniqueOrThrow({
+    where: { name: "default" },
+    select: { lists: { include: { jobs: true } } },
+  });
+  // const lists = await db.list.findMany();
+  // console.log({ lists: board.lists });
+  // const allJobs = await db.job.findMany();
+  // const jobsByColumn = selectJobsByColumn(allJobs);
 
-  return json({ jobs: jobsByColumn });
+  return json({ lists: board.lists });
 };
 
 export default function Boards() {
-  const { jobs } = useLoaderData<typeof loader>();
+  const { lists } = useLoaderData<typeof loader>();
 
   return (
     <div>
       <Outlet />
       <div>
-        {Object.entries(jobs).map(([columnName, jobsInColumn]) => (
-          <Column
-            key={columnName}
-            name={columnName}
-            jobs={jobsInColumn as unknown as Job[]}
-          />
-        ))}
+        {lists
+          .sort((a, b) => a.sortOrder - b.sortOrder)
+          .map(({ name, jobs }) => (
+            <Column key={name} name={name} jobs={jobs as unknown as Job[]} />
+          ))}
       </div>
     </div>
   );
