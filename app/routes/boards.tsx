@@ -7,17 +7,12 @@ import CreateJobModal from "~/components/CreateJobModal";
 import type { Job } from "~/types";
 import { db } from "~/utils/db.server";
 import { json } from "@remix-run/node";
-import { selectJobsByColumn } from "~/selectors/selectJobsByColumn";
 
 export const loader = async () => {
   const board = await db.board.findUniqueOrThrow({
     where: { name: "default" },
     select: { lists: { include: { jobs: true } } },
   });
-  // const lists = await db.list.findMany();
-  // console.log({ lists: board.lists });
-  // const allJobs = await db.job.findMany();
-  // const jobsByColumn = selectJobsByColumn(allJobs);
 
   return json({ lists: board.lists });
 };
