@@ -5,28 +5,32 @@ import {
   validateUrl,
   validateUsername,
 } from "~/utils/helpers";
+import * as EmailValidator from "email-validator";
 
 import { type ActionArgs } from "@remix-run/node";
 import { badRequest } from "~/utils/request.server";
 import { db } from "~/utils/db.server";
 import { useActionData, useSearchParams } from "@remix-run/react";
-import { type } from "cypress/types/jquery";
+import { createUserSession, login, register } from "~/utils/session.server";
 
 export const action = async ({ request }: ActionArgs) => {
   const form = await request.formData();
   const loginType = form.get("loginType");
   const username = form.get("username");
+  const email = form.get("email");
   const password = form.get("password");
   const confirmPassword = form.get("confirm-password");
   const redirectTo = validateUrl((form.get("redirectTo") as string) || "/");
 
-  if (
+  const failedTypeCheck =
     typeof loginType !== "string" ||
     typeof username !== "string" ||
     typeof password !== "string" ||
-    typeof confirmPassword !== "string" ||
-    typeof redirectTo !== "string"
-  ) {
+    typeof redirectTo !== "string" ||
+    (loginType === "register" &&
+      (typeof email !== "string" || typeof confirmPassword !== "string"));
+
+  if (failedTypeCheck) {
     return badRequest({
       fieldErrors: null,
       fields: null,
@@ -34,14 +38,34 @@ export const action = async ({ request }: ActionArgs) => {
     });
   }
 
-  const fields = { loginType, username, password, confirmPassword };
-
-  const fieldErrors = {
-    username: validateUsername(username),
-    password: validatePassword(password),
-    confirmPassword:
-      password === confirmPassword ? "The passwords don't match" : undefined,
+  const fields = {
+    email: email ?? undefined,
+    loginType,
+    username,
+    password,
+    confirmPassword: confirmPassword ?? undefined,
   };
+
+  const fieldErrors =
+    loginType === "register"
+      ? {
+          email:
+            typeof email === "string" && EmailValidator.validate(email)
+              ? undefined
+              : "Invalid email",
+          username: validateUsername(username),
+          password: validatePassword(password),
+          confirmPassword:
+            password !== confirmPassword
+              ? "The passwords don't match"
+              : undefined,
+        }
+      : {
+          email: undefined,
+          confirmPassword: undefined,
+          username: validateUsername(username),
+          password: validatePassword(password),
+        };
 
   if (Object.values(fieldErrors).some(Boolean)) {
     return badRequest({
@@ -52,18 +76,18 @@ export const action = async ({ request }: ActionArgs) => {
   }
 
   switch (loginType) {
-      // login to get the user
+    // login to get the user
     case "login": {
       const user = await login({ username, password });
 
       // if there's no user, return the fields and a formError
       if (!user) {
-      return badRequest({
-        fieldErrors: null,
-        fields,
+        return badRequest({
+          fieldErrors: null,
+          fields,
           formError: "Username/password combination is incorrect",
-      });
-    }
+        });
+      }
 
       return createUserSession({ userId: user.id, redirectTo: "/boards/1" });
     }
@@ -92,10 +116,10 @@ export const action = async ({ request }: ActionArgs) => {
 
       if (!user) {
         badRequest({
-        fieldErrors: null,
-        fields,
+          fieldErrors: null,
+          fields,
           formError: `Something went wrong when trying to create a new user`,
-      });
+        });
       }
 
       return createUserSession({ userId: user.id, redirectTo });
@@ -113,8 +137,9 @@ export const action = async ({ request }: ActionArgs) => {
 export default function Login() {
   const actionData = useActionData<typeof action>();
   const [searchParams] = useSearchParams();
-  const [type, setType] = React.useState("login");
-  console.log({ actionData });
+  const [type, setType] = React.useState(
+    actionData?.fields?.loginType || "login"
+  );
 
   return (
     <div>
@@ -134,10 +159,7 @@ export default function Login() {
                 name="loginType"
                 value="login"
                 onChange={(e) => setType(e.target.value)}
-                defaultChecked={
-                  !actionData?.fields?.loginType ||
-                  actionData?.fields?.loginType === "login"
-                }
+                defaultChecked={type === "login"}
               />{" "}
               Login
             </label>
@@ -147,11 +169,36 @@ export default function Login() {
                 name="loginType"
                 value="register"
                 onChange={(e) => setType(e.target.value)}
-                defaultChecked={actionData?.fields?.loginType === "register"}
+                defaultChecked={type === "register"}
               />{" "}
               Register
             </label>
           </fieldset>
+          {type === "register" && (
+            <div>
+              <label htmlFor="email-input">Email</label>
+              <input
+                type="email"
+                id="email-input"
+                name="email"
+                placeholder="Email"
+                defaultValue={actionData?.fields?.email}
+                aria-invalid={!!actionData?.fieldErrors?.email}
+                aria-errormessage={
+                  actionData?.fieldErrors?.email ? "email-error" : undefined
+                }
+              />
+              {actionData?.fieldErrors?.email ? (
+                <p
+                  className="form-validation-error"
+                  role="alert"
+                  id="email-error"
+                >
+                  {actionData.fieldErrors.email}
+                </p>
+              ) : null}
+            </div>
+          )}
           <div>
             <label htmlFor="username-input">Username</label>
             <input
@@ -206,7 +253,6 @@ export default function Login() {
                 name="confirm-password"
                 type="password"
                 placeholder="Enter your password again"
-                defaultValue={actionData?.fields?.confirmPassword}
                 aria-invalid={!!actionData?.fieldErrors?.confirmPassword}
                 aria-errormessage={
                   actionData?.fieldErrors?.confirmPassword
