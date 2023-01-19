@@ -112,3 +112,17 @@ export async function getUser(request: Request) {
     throw logout(request);
   }
 }
+
+export async function register({
+  username,
+  password,
+  email,
+}: LoginForm & { email: string }) {
+  const passwordHash = await bcrypt.hash(password, 10);
+
+  const user = await db.user.create({
+    data: { email, username, passwordHash },
+  });
+
+  return { id: user.id, username };
+}
