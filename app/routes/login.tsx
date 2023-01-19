@@ -52,15 +52,20 @@ export const action = async ({ request }: ActionArgs) => {
   }
 
   switch (loginType) {
-    case "login": {
       // login to get the user
+    case "login": {
+      const user = await login({ username, password });
+
       // if there's no user, return the fields and a formError
-      // if there is a user, create their session and redirect to /jokes
+      if (!user) {
       return badRequest({
         fieldErrors: null,
         fields,
-        formError: "Not implemented",
+          formError: "Username/password combination is incorrect",
       });
+    }
+
+      return createUserSession({ userId: user.id, redirectTo: "/boards/1" });
     }
     case "register": {
       const userExists = await db.user.findFirst({
