@@ -68,8 +68,15 @@ export const action = async ({ request }: ActionArgs) => {
       return createUserSession({ userId: user.id, redirectTo: "/boards/1" });
     }
     case "register": {
+      if (typeof email !== "string") {
+        return badRequest({
+          fieldErrors: null,
+          fields,
+          formError: "Invalid email",
+        });
+      }
       const userExists = await db.user.findFirst({
-        where: { username },
+        where: { username, email },
       });
 
       if (userExists) {
@@ -81,11 +88,17 @@ export const action = async ({ request }: ActionArgs) => {
       }
       // create the user
       // create their session and redirect to /jokes
-      return badRequest({
+      const user = await register({ username, password, email });
+
+      if (!user) {
+        badRequest({
         fieldErrors: null,
         fields,
-        formError: "Not implemented",
+          formError: `Something went wrong when trying to create a new user`,
       });
+      }
+
+      return createUserSession({ userId: user.id, redirectTo });
     }
     default: {
       return badRequest({
