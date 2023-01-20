@@ -6,16 +6,24 @@ import Card from "~/components/Card";
 import type { Job } from "~/types";
 
 type ColumnProps = {
+  listId: number;
   name: string;
   jobs: Job[];
   setIsModalOpen: Dispatch<SetStateAction<boolean>>;
+  setSelectedListId: Dispatch<SetStateAction<number>>;
 };
 
-export default function Column({ name, jobs, setIsModalOpen }: ColumnProps) {
-  const handleModalOpen = React.useCallback(
-    () => setIsModalOpen((state: boolean) => !state),
-    [setIsModalOpen]
-  );
+export default function Column({
+  listId,
+  name,
+  jobs,
+  setIsModalOpen,
+  setSelectedListId,
+}: ColumnProps) {
+  const handleModalOpen = React.useCallback(() => {
+    setSelectedListId(listId);
+    setIsModalOpen((state: boolean) => !state);
+  }, [listId, setIsModalOpen, setSelectedListId]);
 
   return (
     <div>
