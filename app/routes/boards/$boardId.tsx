@@ -1,10 +1,46 @@
 import Column from "~/components/Column";
-import CreateJobModal from "~/components/CreateJobModal";
 import type { Job } from "~/types";
 import React from "react";
 import { db } from "~/utils/db.server";
-import { json } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { json, type LoaderArgs, type ActionArgs } from "@remix-run/node";
+import { Link, useLoaderData } from "@remix-run/react";
+import { z } from "zod";
+import { getUser, requireUserId } from "~/utils/session.server";
+import AddJobModal from "~/components/AddJobModal";
+
+const FormSchema = z.object({
+  company: z.string().min(1),
+  title: z.string().min(1),
+  listId: z.number().min(1),
+  userId: z.string().min(1),
+});
+
+export const action = async ({ request }: ActionArgs) => {
+  const userId = await requireUserId(request);
+  const form = await request.formData();
+  const company = form.get("company");
+  const title = form.get("jobTitle");
+  const listId = Number(form.get("list"));
+
+  const data = {
+    company,
+    title,
+    listId,
+    userId,
+  };
+
+  const result = FormSchema.safeParse(data);
+
+  if (!result.success) {
+    return json({ error: result.error.issues });
+  } else {
+    const res = await db.job.create({
+      data: result.data,
+    });
+
+    return res;
+  }
+};
 
 export const loader = async ({ params, request }: LoaderArgs) => {
   const user = await getUser(request);
@@ -35,10 +71,7 @@ export default function BoardRoute() {
       )}
 
       {isModalOpen && (
-        <CreateJobModal
-          listId={selectedListId}
-          setIsModalOpen={setIsModalOpen}
-        />
+        <AddJobModal listId={selectedListId} setIsModalOpen={setIsModalOpen} />
       )}
 
       {lists
