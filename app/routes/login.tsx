@@ -5,13 +5,12 @@ import {
   validateUrl,
   validateUsername,
 } from "~/utils/helpers";
-import * as EmailValidator from "email-validator";
-
 import { type ActionArgs } from "@remix-run/node";
 import { badRequest } from "~/utils/request.server";
 import { db } from "~/utils/db.server";
 import { useActionData, useSearchParams } from "@remix-run/react";
 import { createUserSession, login, register } from "~/utils/session.server";
+import { z } from "zod";
 
 export const action = async ({ request }: ActionArgs) => {
   const form = await request.formData();
@@ -46,11 +45,13 @@ export const action = async ({ request }: ActionArgs) => {
     confirmPassword: confirmPassword ?? undefined,
   };
 
+  const emailResult = z.string().email().safeParse(email);
+
   const fieldErrors =
     loginType === "register"
       ? {
           email:
-            typeof email === "string" && EmailValidator.validate(email)
+            typeof email === "string" && emailResult.success
               ? undefined
               : "Invalid email",
           username: validateUsername(username),
