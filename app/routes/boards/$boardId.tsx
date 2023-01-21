@@ -8,6 +8,8 @@ import { z } from "zod";
 import { getUser, requireUserId } from "~/utils/session.server";
 import AddJobModal from "~/components/AddJobModal";
 
+import { CardDetailModal } from "~/components/CardDetailModal";
+
 const FormSchema = z.object({
   company: z.string().min(1),
   title: z.string().min(1),
@@ -16,29 +18,53 @@ const FormSchema = z.object({
 });
 
 export const action = async ({ request }: ActionArgs) => {
-  const userId = await requireUserId(request);
   const form = await request.formData();
-  const company = form.get("company");
-  const title = form.get("jobTitle");
-  const listId = Number(form.get("list"));
+  const userId = await requireUserId(request);
+  const intent = form.get("intent");
 
-  const data = {
-    company,
-    title,
-    listId,
-    userId,
-  };
+  if (intent !== "delete") {
+    const company = form.get("company");
+    const title = form.get("jobTitle");
+    const listId = Number(form.get("list"));
 
-  const result = FormSchema.safeParse(data);
+    const data = {
+      company,
+      title,
+      listId,
+      userId,
+    };
 
-  if (!result.success) {
-    return json({ error: result.error.issues });
+    const result = FormSchema.safeParse(data);
+
+    if (!result.success) {
+      return json({ error: result.error.issues });
+    } else {
+      const res = await db.job.create({
+        data: result.data,
+      });
+
+      return res;
+    }
   } else {
-    const res = await db.job.create({
-      data: result.data,
-    });
+    // check if it's the same user who created the job
+    const job = JSON.parse(z.string().parse(form.get("json")));
 
-    return res;
+    const jobInDb = await db.job.findUniqueOrThrow({ where: { id: job.id } });
+
+    if (!jobInDb) {
+      throw new Response("Can't delete what does not exist", {
+        status: 404,
+      });
+    }
+
+    if (job.userId !== userId) {
+      throw new Response("Cannot delete the job since you're not authorized", {
+        status: 403,
+      });
+    }
+
+    await db.job.delete({ where: { id: job.id } });
+    return null;
   }
 };
 
@@ -54,8 +80,18 @@ export const loader = async ({ params, request }: LoaderArgs) => {
 
 export default function BoardRoute() {
   const { lists, user } = useLoaderData<typeof loader>();
+  // add job modal states
   const [isModalOpen, setIsModalOpen] = React.useState<boolean>(false);
   const [selectedListId, setSelectedListId] = React.useState<number>(-1);
+  // job detail modal states
+  const [isDetailOpen, setIsDetailOpen] = React.useState<boolean>(false);
+  const [currentJob, setCurrentJob] = React.useState<Job | null>(null);
+
+  const handleOnCardClick = React.useCallback((job: Job) => {
+    console.log({ job });
+    setIsDetailOpen((state) => !state);
+    setCurrentJob(job);
+  }, []);
 
   return (
     <div>
@@ -69,11 +105,14 @@ export default function BoardRoute() {
       ) : (
         <Link to="/login">Login</Link>
       )}
-
       {isModalOpen && (
         <AddJobModal listId={selectedListId} setIsModalOpen={setIsModalOpen} />
       )}
 
+      {/* // confirm modal to delete? */}
+      {isDetailOpen && (
+        <CardDetailModal job={currentJob} setIsDetailOpen={setIsDetailOpen} />
+      )}
       {lists
         .sort((a, b) => a.sortOrder - b.sortOrder)
         .map(({ id, name, jobs }) => (
@@ -81,6 +120,7 @@ export default function BoardRoute() {
             key={id}
             listId={id}
             name={name}
+            handleClick={handleOnCardClick}
             setIsModalOpen={setIsModalOpen}
             setSelectedListId={setSelectedListId}
             // manually casting because of Remix's typing issue
