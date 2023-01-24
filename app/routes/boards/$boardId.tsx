@@ -3,7 +3,7 @@ import type { Job } from "~/types";
 import React from "react";
 import { db } from "~/utils/db.server";
 import { json, type LoaderArgs, type ActionArgs } from "@remix-run/node";
-import { Link, useLoaderData } from "@remix-run/react";
+import { Link, useLoaderData, useParams } from "@remix-run/react";
 import { z } from "zod";
 import { getUser, requireUserId } from "~/utils/session.server";
 import AddJobModal from "~/components/AddJobModal";
@@ -128,5 +128,12 @@ export default function BoardRoute() {
           />
         ))}
     </div>
+  );
+}
+
+export function ErrorBoundary({ error }: { error: Error }) {
+  const { boardId } = useParams();
+  return (
+    <div>{`There was an error loading the board with the id ${boardId}. Please reload the page. If the issue is persisting, please contact the support team.`}</div>
   );
 }
