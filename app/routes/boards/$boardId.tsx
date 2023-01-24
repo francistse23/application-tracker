@@ -88,7 +88,6 @@ export default function BoardRoute() {
   const [currentJob, setCurrentJob] = React.useState<Job | null>(null);
 
   const handleOnCardClick = React.useCallback((job: Job) => {
-    console.log({ job });
     setIsDetailOpen((state) => !state);
     setCurrentJob(job);
   }, []);
