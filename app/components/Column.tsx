@@ -9,6 +9,7 @@ type ColumnProps = {
   listId: number;
   name: string;
   jobs: Job[];
+  handleClick: (job: Job) => void;
   setIsModalOpen: Dispatch<SetStateAction<boolean>>;
   setSelectedListId: Dispatch<SetStateAction<number>>;
 };
@@ -17,6 +18,7 @@ export default function Column({
   listId,
   name,
   jobs,
+  handleClick,
   setIsModalOpen,
   setSelectedListId,
 }: ColumnProps) {
@@ -34,7 +36,7 @@ export default function Column({
 
       <div>
         {jobs.map((job) => (
-          <Card key={job.id} job={job} />
+          <Card key={job.id} job={job} handleClick={handleClick} />
         ))}
       </div>
     </div>

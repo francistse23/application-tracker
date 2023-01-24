@@ -1,8 +1,18 @@
 import type { Job } from "~/types";
 
-export default function Card({ job }: { job: Job }) {
+type CardProps = {
+  job: Job;
+  handleClick: (job: Job) => void;
+};
+
+export default function Card({ job, handleClick }: CardProps) {
   return (
-    <div>
+    <div
+      onClick={() => handleClick(job)}
+      style={{
+        border: "1px solid black",
+      }}
+    >
       <div>{job.company}</div>
       <div>{job.title}</div>
     </div>
