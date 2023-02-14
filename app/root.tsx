@@ -9,12 +9,26 @@ import {
 } from "@remix-run/react";
 import type { LinksFunction, MetaFunction } from "@remix-run/node";
 
+import { error } from "cypress/types/jquery";
 import globalLargeStylesUrl from "./styles/global-large.css";
 import globalMediumStylesUrl from "./styles/global-medium.css";
 import globalStylesUrl from "./styles/global.css";
 
 export const links: LinksFunction = () => {
   return [
+    {
+      rel: "stylesheet",
+      href: "https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&display=swap",
+    },
+    {
+      rel: "preconnect",
+      href: "https://fonts.googleapis.com",
+    },
+    {
+      rel: "preconnect",
+      href: "https://fonts.gstatic.com",
+      crossorigin: true,
+    },
     {
       rel: "stylesheet",
       href: globalStylesUrl,
