@@ -9,7 +9,6 @@ import {
 } from "@remix-run/react";
 import type { LinksFunction, MetaFunction } from "@remix-run/node";
 
-import { error } from "cypress/types/jquery";
 import globalLargeStylesUrl from "./styles/global-large.css";
 import globalMediumStylesUrl from "./styles/global-medium.css";
 import globalStylesUrl from "./styles/global.css";
@@ -54,7 +53,7 @@ export const meta: MetaFunction = () => ({
 
 function Document({
   children,
-  title = `Land It - Your one stop job board`,
+  title = `Land It - Your go-to job apps tracker`,
 }: {
   children: React.ReactNode;
   title?: string;
