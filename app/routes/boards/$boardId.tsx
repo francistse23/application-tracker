@@ -22,7 +22,31 @@ export const action = async ({ request }: ActionArgs) => {
   const userId = await requireUserId(request);
   const intent = form.get("intent");
 
-  if (intent !== "delete") {
+  switch (intent) {
+    case "delete": {
+      const job = JSON.parse(z.string().parse(form.get("json")));
+
+      const jobInDb = await db.job.findUniqueOrThrow({ where: { id: job.id } });
+
+      if (!jobInDb) {
+        throw new Response("Can't delete what does not exist", {
+          status: 404,
+        });
+      }
+
+      if (job.userId !== userId) {
+        throw new Response(
+          "Cannot delete the job since you're not authorized",
+          {
+            status: 403,
+          }
+        );
+      }
+
+      await db.job.delete({ where: { id: job.id } });
+      return null;
+    }
+    default: {
     const company = form.get("company");
     const title = form.get("jobTitle");
     const listId = Number(form.get("list"));
@@ -45,23 +69,9 @@ export const action = async ({ request }: ActionArgs) => {
 
       return res;
     }
-  } else {
-    // check if it's the same user who created the job
-    const job = JSON.parse(z.string().parse(form.get("json")));
-
-    const jobInDb = await db.job.findUniqueOrThrow({ where: { id: job.id } });
-
-    if (!jobInDb) {
-      throw new Response("Can't delete what does not exist", {
-        status: 404,
-      });
     }
-
-    if (job.userId !== userId) {
-      throw new Response("Cannot delete the job since you're not authorized", {
-        status: 403,
-      });
     }
+};
 
     await db.job.delete({ where: { id: job.id } });
     return null;
