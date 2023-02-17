@@ -39,54 +39,63 @@ export default function AddJobModal({
   const [selectedListId, setSelectedListId] = React.useState<number>(listId);
 
   return (
-    <Form method="post">
-      <span>Add job</span>
-      <p>
-        <label>
-          Company
-          <input
-            name="company"
-            type="text"
-            disabled={transition.state === "submitting"}
-          />
-        </label>
-      </p>
-      <p>
-        <label>
-          Job Title
-          <input
-            name="jobTitle"
-            type="text"
-            disabled={transition.state === "submitting"}
-          />
-          {/* TODO: fix error rendered */}
-          {actionData?.error ? <div>{actionData?.error[0].message}</div> : null}
-        </label>
-      </p>
+    <div className="modal-container" onClick={() => setIsModalOpen(false)}>
+      <Form
+        method="post"
+        className="job-details"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="form-row">
+          <div className="form-col">
+            <label htmlFor="company">Company</label>
+            <input
+              name="company"
+              type="text"
+              disabled={transition.state === "submitting"}
+            />
 
-      <p>
-        <label>
-          List
-          <select
-            name="list"
-            onChange={(e) => setSelectedListId(Number(e.target.value))}
-            defaultValue={selectedListId}
-            disabled={transition.state === "submitting"}
+            <label htmlFor="jobTitle">Job Title</label>
+            <input
+              name="jobTitle"
+              placeholder="Job title"
+              type="text"
+              required
+              disabled={transition.state === "submitting"}
+            />
+            {/* TODO: fix error rendered */}
+            {actionData?.error ? (
+              <div>{actionData?.error[0].message}</div>
+            ) : null}
+          </div>
+          <div className="form-col">
+            <label htmlFor="list">List</label>
+            <select
+              name="list"
+              onChange={(e) => setSelectedListId(Number(e.target.value))}
+              defaultValue={selectedListId}
+              disabled={transition.state === "submitting"}
+            >
+              {lists.map((list) => (
+                <option key={list.id} value={list.id}>
+                  {list.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="buttons-container">
+          <button
+            className="button danger-button"
+            onClick={() => setIsModalOpen(false)}
           >
-            {lists.map((list) => (
-              <option key={list.id} value={list.id}>
-                {list.name}
-              </option>
-            ))}
-          </select>
-        </label>
-      </p>
-      <div>
-        <button onClick={() => setIsModalOpen(false)}>Cancel</button>
-        <button type="submit">
-          {transition.state === "submitting" ? "Saving" : "Save"}
-        </button>
-      </div>
-    </Form>
+            Cancel
+          </button>
+          <button className="button" type="submit">
+            {transition.state === "submitting" ? "Saving" : "Save"}
+          </button>
+        </div>
+      </Form>
+    </div>
   );
 }
