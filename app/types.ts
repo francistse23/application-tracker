@@ -2,6 +2,7 @@ import { Prisma } from "@prisma/client";
 
 const job = Prisma.validator<Prisma.JobArgs>()({
   select: {
+    id: true,
     company: true,
     description: true,
     title: true,
