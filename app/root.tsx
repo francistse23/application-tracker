@@ -7,8 +7,43 @@ import {
   ScrollRestoration,
   useCatch,
 } from "@remix-run/react";
+import type { LinksFunction, MetaFunction } from "@remix-run/node";
 
-import type { MetaFunction } from "@remix-run/node";
+import globalLargeStylesUrl from "./styles/global-large.css";
+import globalMediumStylesUrl from "./styles/global-medium.css";
+import globalStylesUrl from "./styles/global.css";
+
+export const links: LinksFunction = () => {
+  return [
+    {
+      rel: "stylesheet",
+      href: "https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&display=swap",
+    },
+    {
+      rel: "preconnect",
+      href: "https://fonts.googleapis.com",
+    },
+    {
+      rel: "preconnect",
+      href: "https://fonts.gstatic.com",
+      crossorigin: true,
+    },
+    {
+      rel: "stylesheet",
+      href: globalStylesUrl,
+    },
+    {
+      rel: "stylesheet",
+      href: globalMediumStylesUrl,
+      media: "print, (min-width: 640px)",
+    },
+    {
+      rel: "stylesheet",
+      href: globalLargeStylesUrl,
+      media: "screen and (min-width: 1024px)",
+    },
+  ];
+};
 
 export const meta: MetaFunction = () => ({
   charset: "utf-8",
@@ -18,7 +53,7 @@ export const meta: MetaFunction = () => ({
 
 function Document({
   children,
-  title = `Land It - Your one stop job board`,
+  title = `Land It - Your go-to job apps tracker`,
 }: {
   children: React.ReactNode;
   title?: string;

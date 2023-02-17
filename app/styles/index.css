@@ -1,0 +1,96 @@
+/*
+ * when the user visits this page, this style will apply, when they leave, it
+ * will get unloaded, so don't worry so much about conflicting styles between
+ * pages!
+ */
+
+body {
+  background: var(--color-background);
+  max-width: 1600px;
+  margin: 0 auto;
+  text-shadow: 0 0.2rem 0 var(--font-color-secondary);
+}
+
+.container {
+  min-height: inherit;
+}
+
+.container,
+.content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  row-gap: 2rem;
+}
+
+.content {
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
+
+h1 {
+  margin: 0;
+  text-align: center;
+  letter-spacing: 0.25rem;
+}
+
+/* h1 span {
+  display: block;
+  font-size: 4.5rem;
+  line-height: 1;
+  text-transform: uppercase;
+  text-shadow: 0 0.2em 0.5em rgba(0, 0, 0, 0.5), 0 5px 0
+      rgba(0, 0, 0, 0.75);
+} */
+
+nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 1rem;
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  line-height: 1;
+}
+
+nav ul a:hover {
+  text-decoration-style: wavy;
+  text-decoration-thickness: 1px;
+}
+
+@media print, (min-width: 640px) {
+  h1 span {
+    font-size: 6rem;
+  }
+
+  nav ul {
+    font-size: 1.25rem;
+    gap: 1.5rem;
+  }
+}
+
+@media screen and (min-width: 1024px) {
+  h1 span {
+    font-size: 8rem;
+  }
+}
+
+button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+}
+
+a {
+  color: var(--font-color);
+  font-family: var(--font-body);
+  text-shadow: 0 0.2rem 0 var(--font-color-secondary);
+}
+
+a:hover {
+  text-shadow: none;
+  color: var(--font-color-secondary);
+  text-decoration: none;
+}

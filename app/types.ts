@@ -1,14 +1,24 @@
-export type Job = {
-  id: string;
-  // user        User?
-  // userId      string
-  // board       Board
-  // boardId     Int
-  company: string;
-  title: string;
-  url?: string | null;
-  description: string;
-  status?: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-};
+import { Prisma } from "@prisma/client";
+
+const job = Prisma.validator<Prisma.JobArgs>()({
+  select: {
+    id: true,
+    company: true,
+    description: true,
+    title: true,
+    url: true,
+    listId: true,
+    createdAt: true,
+    updatedAt: true,
+  },
+});
+
+const list = Prisma.validator<Prisma.ListArgs>()({
+  select: {
+    id: true,
+    name: true,
+  },
+});
+
+export type Job = Prisma.JobGetPayload<typeof job>;
+export type List = Prisma.ListGetPayload<typeof list>;

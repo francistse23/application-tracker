@@ -7,12 +7,7 @@ type CardProps = {
 
 export default function Card({ job, handleClick }: CardProps) {
   return (
-    <div
-      onClick={() => handleClick(job)}
-      style={{
-        border: "1px solid black",
-      }}
-    >
+    <div className="job" onClick={() => handleClick(job)}>
       <div>{job.company}</div>
       <div>{job.title}</div>
     </div>

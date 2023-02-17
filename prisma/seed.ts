@@ -41,8 +41,26 @@ async function seed() {
       },
     },
     {
-      name: "interviewing",
+      name: "interview",
       sortOrder: 2,
+      board: {
+        connect: {
+          id: defaultBoard.id,
+        },
+      },
+    },
+    {
+      name: "offer",
+      sortOrder: 3,
+      board: {
+        connect: {
+          id: defaultBoard.id,
+        },
+      },
+    },
+    {
+      name: "rejected",
+      sortOrder: 4,
       board: {
         connect: {
           id: defaultBoard.id,

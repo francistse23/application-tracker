@@ -1,0 +1,39 @@
+.container {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  margin-top: 5rem;
+  max-width: 500px;
+  padding: 2rem;
+  width: 100%;
+}
+
+fieldset {
+  align-self: center;
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  width: 300px;
+}
+
+input [type="radio"] {
+  color: var(--font-color-secondary);
+  display: flex;
+}
+
+h1 {
+  letter-spacing: 0.25rem;
+}
+
+label {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+input {
+  margin-top: 0.25rem;
+}
+
+legend {
+  visibility: hidden;
+}

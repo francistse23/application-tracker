@@ -5,12 +5,24 @@ import {
   validateUrl,
   validateUsername,
 } from "~/utils/helpers";
-import { type ActionArgs } from "@remix-run/node";
+import {
+  redirect,
+  type ActionArgs,
+  type LinksFunction,
+  type LoaderArgs,
+} from "@remix-run/node";
 import { badRequest } from "~/utils/request.server";
 import { db } from "~/utils/db.server";
 import { useActionData, useSearchParams } from "@remix-run/react";
-import { createUserSession, login, register } from "~/utils/session.server";
+import {
+  createUserSession,
+  getUser,
+  login,
+  register,
+} from "~/utils/session.server";
 import { z } from "zod";
+
+import stylesUrl from "~/styles/login.css";
 
 export const action = async ({ request }: ActionArgs) => {
   const form = await request.formData();
@@ -135,6 +147,20 @@ export const action = async ({ request }: ActionArgs) => {
   }
 };
 
+export const links: LinksFunction = () => [
+  { rel: "stylesheet", href: stylesUrl },
+];
+
+export const loader = async ({ request }: LoaderArgs) => {
+  const user = await getUser(request);
+
+  if (user) {
+    throw redirect("/boards/1");
+  }
+
+  return null;
+};
+
 export default function Login() {
   const actionData = useActionData<typeof action>();
   const [searchParams] = useSearchParams();
@@ -143,147 +169,145 @@ export default function Login() {
   );
 
   return (
-    <div>
-      <div>
-        <h1 style={{ textTransform: "capitalize" }}>{type}</h1>
-        <form method="post">
+    <div className="container">
+      <h1 style={{ textTransform: "capitalize" }}>{type}</h1>
+      <form method="post">
+        <input
+          type="hidden"
+          name="redirectTo"
+          value={searchParams.get("redirectTo") ?? undefined}
+        />
+        <fieldset>
+          <legend>Login or Register?</legend>
+          <label>
+            <input
+              type="radio"
+              name="loginType"
+              value="login"
+              onChange={(e) => setType(e.target.value)}
+              defaultChecked={type === "login"}
+            />{" "}
+            Login
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="loginType"
+              value="register"
+              onChange={(e) => setType(e.target.value)}
+              defaultChecked={type === "register"}
+            />{" "}
+            Register
+          </label>
+        </fieldset>
+        {type === "register" && (
+          <div>
+            <label htmlFor="email-input">Email</label>
+            <input
+              type="email"
+              id="email-input"
+              name="email"
+              placeholder="Email"
+              defaultValue={actionData?.fields?.email}
+              aria-invalid={!!actionData?.fieldErrors?.email}
+              aria-errormessage={
+                actionData?.fieldErrors?.email ? "email-error" : undefined
+              }
+            />
+            {actionData?.fieldErrors?.email ? (
+              <p
+                className="form-validation-error"
+                role="alert"
+                id="email-error"
+              >
+                {actionData.fieldErrors.email}
+              </p>
+            ) : null}
+          </div>
+        )}
+        <div>
+          <label htmlFor="username-input">Username</label>
           <input
-            type="hidden"
-            name="redirectTo"
-            value={searchParams.get("redirectTo") ?? undefined}
+            type="text"
+            id="username-input"
+            name="username"
+            placeholder="Username"
+            defaultValue={actionData?.fields?.username}
+            aria-invalid={!!actionData?.fieldErrors?.username}
+            aria-errormessage={
+              actionData?.fieldErrors?.username ? "username-error" : undefined
+            }
           />
-          <fieldset>
-            <legend>Login or Register?</legend>
-            <label>
-              <input
-                type="radio"
-                name="loginType"
-                value="login"
-                onChange={(e) => setType(e.target.value)}
-                defaultChecked={type === "login"}
-              />{" "}
-              Login
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="loginType"
-                value="register"
-                onChange={(e) => setType(e.target.value)}
-                defaultChecked={type === "register"}
-              />{" "}
-              Register
-            </label>
-          </fieldset>
-          {type === "register" && (
-            <div>
-              <label htmlFor="email-input">Email</label>
-              <input
-                type="email"
-                id="email-input"
-                name="email"
-                placeholder="Email"
-                defaultValue={actionData?.fields?.email}
-                aria-invalid={!!actionData?.fieldErrors?.email}
-                aria-errormessage={
-                  actionData?.fieldErrors?.email ? "email-error" : undefined
-                }
-              />
-              {actionData?.fieldErrors?.email ? (
-                <p
-                  className="form-validation-error"
-                  role="alert"
-                  id="email-error"
-                >
-                  {actionData.fieldErrors.email}
-                </p>
-              ) : null}
-            </div>
-          )}
+          {actionData?.fieldErrors?.username ? (
+            <p
+              className="form-validation-error"
+              role="alert"
+              id="username-error"
+            >
+              {actionData.fieldErrors.username}
+            </p>
+          ) : null}
+        </div>
+        <div>
+          <label htmlFor="password-input">Password</label>
+          <input
+            id="password-input"
+            name="password"
+            type="password"
+            placeholder="Password"
+            defaultValue={actionData?.fields?.password}
+            aria-invalid={!!actionData?.fieldErrors?.password}
+            aria-errormessage={
+              actionData?.fieldErrors?.password ? "password-error" : undefined
+            }
+          />
+          {actionData?.fieldErrors?.password ? (
+            <p
+              className="form-validation-error"
+              role="alert"
+              id="password-error"
+            >
+              {actionData.fieldErrors.password}
+            </p>
+          ) : null}
+        </div>
+        {type === "register" && (
           <div>
-            <label htmlFor="username-input">Username</label>
+            <label htmlFor="confirm-password-input">Confirm Password</label>
             <input
-              type="text"
-              id="username-input"
-              name="username"
-              placeholder="Username"
-              defaultValue={actionData?.fields?.username}
-              aria-invalid={!!actionData?.fieldErrors?.username}
-              aria-errormessage={
-                actionData?.fieldErrors?.username ? "username-error" : undefined
-              }
-            />
-            {actionData?.fieldErrors?.username ? (
-              <p
-                className="form-validation-error"
-                role="alert"
-                id="username-error"
-              >
-                {actionData.fieldErrors.username}
-              </p>
-            ) : null}
-          </div>
-          <div>
-            <label htmlFor="password-input">Password</label>
-            <input
-              id="password-input"
-              name="password"
+              id="confirm-password-input"
+              name="confirm-password"
               type="password"
-              placeholder="Password"
-              defaultValue={actionData?.fields?.password}
-              aria-invalid={!!actionData?.fieldErrors?.password}
+              placeholder="Enter your password again"
+              aria-invalid={!!actionData?.fieldErrors?.confirmPassword}
               aria-errormessage={
-                actionData?.fieldErrors?.password ? "password-error" : undefined
+                actionData?.fieldErrors?.confirmPassword
+                  ? "confirm-password-error"
+                  : undefined
               }
             />
-            {actionData?.fieldErrors?.password ? (
+            {actionData?.fieldErrors?.confirmPassword ? (
               <p
                 className="form-validation-error"
                 role="alert"
-                id="password-error"
+                id="confirm-password-error"
               >
-                {actionData.fieldErrors.password}
+                {actionData.fieldErrors.confirmPassword}
               </p>
             ) : null}
           </div>
-          {type === "register" && (
-            <div>
-              <label htmlFor="confirm-password-input">Confirm Password</label>
-              <input
-                id="confirm-password-input"
-                name="confirm-password"
-                type="password"
-                placeholder="Enter your password again"
-                aria-invalid={!!actionData?.fieldErrors?.confirmPassword}
-                aria-errormessage={
-                  actionData?.fieldErrors?.confirmPassword
-                    ? "confirm-password-error"
-                    : undefined
-                }
-              />
-              {actionData?.fieldErrors?.confirmPassword ? (
-                <p
-                  className="form-validation-error"
-                  role="alert"
-                  id="confirm-password-error"
-                >
-                  {actionData.fieldErrors.confirmPassword}
-                </p>
-              ) : null}
-            </div>
-          )}
-          <div id="form-error-message">
-            {actionData?.formError ? (
-              <p className="form-validation-error" role="alert">
-                {actionData.formError}
-              </p>
-            ) : null}
-          </div>
-          <button type="submit" className="button">
-            Submit
-          </button>
-        </form>
-      </div>
+        )}
+        <div id="form-error-message">
+          {actionData?.formError ? (
+            <p className="form-validation-error" role="alert">
+              {actionData.formError}
+            </p>
+          ) : null}
+        </div>
+        <button type="submit" className="button">
+          Submit
+        </button>
+      </form>
     </div>
   );
 }
