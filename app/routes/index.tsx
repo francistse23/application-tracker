@@ -10,10 +10,11 @@ export default function Index() {
   return (
     <div className="container">
       <div className="content">
-        <h1>Welcome to Land It</h1>
-        <h2>Your one stop job board</h2>
-        <Link to="boards/1">Go to your board</Link>
-        <Link to="login">Login</Link>
+        <h1>Land It</h1>
+        <h2>Your go-to job app tracker</h2>
+        <button>
+          <Link to="login">Login</Link>
+        </button>
       </div>
     </div>
   );
