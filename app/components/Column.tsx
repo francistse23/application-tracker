@@ -28,13 +28,18 @@ export default function Column({
   }, [listId, setIsModalOpen, setSelectedListId]);
 
   return (
-    <div>
-      <h3>{name}</h3>
-      <h4>{jobs.length} jobs</h4>
+    <div className="list-container">
+      {/* TODO：add edit title function */}
+      <h5 className="list-title">{name}</h5>
+      <h6 className="num-jobs">
+        {jobs.length} {jobs.length > 1 ? "Jobs" : "Job"}
+      </h6>
 
-      <button onClick={handleModalOpen}>+</button>
+      <button className="button" onClick={handleModalOpen}>
+        +
+      </button>
 
-      <div>
+      <div className="jobs-container">
         {jobs.map((job) => (
           <Card key={job.id} job={job} handleClick={handleClick} />
         ))}
